@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaps Card Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="controls">
+        <button class="btn btn-new-game" onclick="newGame()">New Game</button>
+        <button class="btn btn-redeal" id="redeal-btn" onclick="redeal()" disabled>Redeal</button>
+        <button class="btn btn-undo" id="undo-btn" onclick="undo()" disabled>Undo</button>
+        <button class="btn btn-instructions" onclick="showInstructions()">Instructions</button>
+        <button class="btn btn-settings" onclick="showSettings()">Settings</button>
+    </div>
+
+    <div class="game-board">
+        <div id="game-area"></div>
+    </div>
+
+    <div class="status" id="status">Click New Game to start!</div>
+
+    <div class="instructions-modal" id="instructions-modal">
+        <div class="instructions-content">
+            <div class="instructions-header">
+                <h2>How to Play Gaps</h2>
+                <button class="close-instructions" onclick="closeInstructions()">&times;</button>
+            </div>
+            <div class="instructions-body">
+                <p><strong>Goal:</strong> Arrange each row in sequence by suit (2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K)</p>
+                <p><strong>Basic Rules:</strong></p>
+                <p>• Click any card to automatically move it to its correct position (if possible)</p>
+                <p>• Click any gap to automatically move the correct card there</p>
+                <p>• Only 2s can be placed in leftmost gaps</p>
+                <p>• Gaps after the highest card in each suit become "dead" (unusable)</p>
+                <p><strong>Game Size:</strong></p>
+                <p>• Choose from 4 to 13 cards per row in Settings</p>
+                <p>• For N cards per row, arrange N-1 cards in sequence (2 through N-1)</p>
+                <p>• Smaller games (4-8 cards) are quicker to play</p>
+                <p>• Larger games (9-13 cards) offer more challenge</p>
+                <p><strong>Redeal Feature:</strong></p>
+                <p>• When all gaps are blocked, the "Redeal" button becomes available</p>
+                <p>• Redeal keeps correct sequences (starting with 2s from the left) in place</p>
+                <p>• All other cards are reshuffled and redealt to give you more chances</p>
+                <p>• Win by completing all four rows!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Game Settings</h2>
+                <button class="close-settings" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Card hover highlighting</span>
+                <div class="toggle-switch" id="card-hover-toggle" onclick="toggleCardHover()"></div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Strategic gaps (vs random gaps)</span>
+                <div class="toggle-switch" id="redeal-mode-toggle" onclick="toggleRedealMode()"></div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Cards per row:</span>
+                <select id="cards-per-row-select" onchange="changeCardsPerRow()">
+                    <option value="4">4 cards</option>
+                    <option value="5">5 cards</option>
+                    <option value="6">6 cards</option>
+                    <option value="7">7 cards</option>
+                    <option value="8">8 cards</option>
+                    <option value="9">9 cards</option>
+                    <option value="10">10 cards</option>
+                    <option value="11">11 cards</option>
+                    <option value="12">12 cards</option>
+                    <option value="13">13 cards</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
