@@ -12,7 +12,8 @@ class GapsGame {
         this.redealCount = 0;
         this.settings = {
             cardHoverHighlighting: true,
-            redealMode: 'strategic'
+            redealMode: 'strategic',
+            lookAheadSteps: 4
         };
     }
 
@@ -538,12 +539,190 @@ class GapsGame {
                     gapElement.classList.add('hover-highlight');
                 }
                 
-                // Highlight the card that can move there
-                const cardElement = document.querySelector(`[data-row="${cardToMove.row}"][data-col="${cardToMove.col}"]`);
-                if (cardElement) {
-                    cardElement.classList.add('hover-target');
+                // Build the chain of moves based on lookAheadSteps setting
+                const moveChain = this.buildMoveChain(cardToMove, row, col);
+                
+                // Highlight all cards in the chain
+                moveChain.forEach((move, index) => {
+                    const cardElement = document.querySelector(`[data-row="${move.row}"][data-col="${move.col}"]`);
+                    if (cardElement) {
+                        cardElement.classList.add('hover-target');
+                    }
+                });
+                
+                // Draw arrows only if lookAheadSteps > 0
+                if (this.settings.lookAheadSteps > 0) {
+                    this.drawMoveChain(moveChain, gapElement);
                 }
             }
+        }
+    }
+
+    buildMoveChain(firstCard, gapRow, gapCol) {
+        const chain = [firstCard];
+        let currentPosition = { row: firstCard.row, col: firstCard.col };
+        
+        // Find additional moves based on lookAheadSteps setting
+        const additionalMoves = Math.max(0, this.settings.lookAheadSteps - 1);
+        for (let i = 0; i < additionalMoves; i++) {
+            const nextMove = this.findNextMoveInChain(chain[chain.length - 1], currentPosition);
+            if (nextMove) {
+                // Check if this card is already in the chain to avoid duplicates
+                const isDuplicate = chain.some(move => move.row === nextMove.row && move.col === nextMove.col);
+                if (isDuplicate) {
+                    break;
+                }
+                
+                chain.push(nextMove);
+                currentPosition = { row: nextMove.row, col: nextMove.col };
+            } else {
+                break; // No more moves possible
+            }
+        }
+        
+        return chain;
+    }
+
+    findNextMoveInChain(card, targetPosition) {
+        // Find what card would move into the position left by the current card
+        if (targetPosition.col === 0) {
+            // Target position is leftmost, so it needs a 2
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < this.cardsPerRow; col++) {
+                    const boardCard = this.board[row][col];
+                    if (boardCard && boardCard.rank === '2') {
+                        return { row, col, card: boardCard };
+                    }
+                }
+            }
+        } else {
+            // Check the card to the left of the target position
+            const leftCard = this.board[targetPosition.row][targetPosition.col - 1];
+            if (!leftCard) {
+                return null; // No card to the left, no move possible
+            }
+            
+            const leftRankIndex = this.ranks.indexOf(leftCard.rank);
+            if (leftRankIndex === -1 || leftRankIndex === this.ranks.length - 1) {
+                return null; // Left card is a King or invalid, no move possible
+            }
+            
+            const neededRank = this.ranks[leftRankIndex + 1];
+            const neededSuit = leftCard.suit;
+            
+            // Find the card that would move into the target position
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < this.cardsPerRow; col++) {
+                    const boardCard = this.board[row][col];
+                    if (boardCard && boardCard.rank === neededRank && boardCard.suit === neededSuit) {
+                        return { row, col, card: boardCard };
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    drawMoveChain(moveChain, gapElement) {
+        if (moveChain.length === 0) return;
+        
+        // Draw arrow from first card to gap
+        const firstCardElement = document.querySelector(`[data-row="${moveChain[0].row}"][data-col="${moveChain[0].col}"]`);
+        if (firstCardElement) {
+            this.drawArrow(firstCardElement, gapElement);
+        }
+        
+        // Draw arrows between subsequent cards
+        for (let i = 0; i < moveChain.length - 1; i++) {
+            const currentCardElement = document.querySelector(`[data-row="${moveChain[i].row}"][data-col="${moveChain[i].col}"]`);
+            const nextCardElement = document.querySelector(`[data-row="${moveChain[i + 1].row}"][data-col="${moveChain[i + 1].col}"]`);
+            
+            if (currentCardElement && nextCardElement) {
+                this.drawArrow(nextCardElement, currentCardElement);
+            }
+        }
+    }
+
+    drawArrow(fromElement, toElement) {
+        if (!fromElement || !toElement) return;
+        
+        // Get positions of both elements
+        const fromRect = fromElement.getBoundingClientRect();
+        const toRect = toElement.getBoundingClientRect();
+        const gameArea = document.getElementById('game-area');
+        const gameAreaRect = gameArea.getBoundingClientRect();
+        
+        // Calculate relative positions within the game area
+        const fromX = fromRect.left + fromRect.width / 2 - gameAreaRect.left;
+        const fromY = fromRect.top + fromRect.height / 2 - gameAreaRect.top;
+        const toX = toRect.left + toRect.width / 2 - gameAreaRect.left;
+        const toY = toRect.top + toRect.height / 2 - gameAreaRect.top;
+        
+        // Create SVG overlay if it doesn't exist
+        let svgOverlay = document.getElementById('arrow-overlay');
+        if (!svgOverlay) {
+            svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svgOverlay.id = 'arrow-overlay';
+            svgOverlay.style.position = 'absolute';
+            svgOverlay.style.top = '0';
+            svgOverlay.style.left = '0';
+            svgOverlay.style.width = '100%';
+            svgOverlay.style.height = '100%';
+            svgOverlay.style.pointerEvents = 'none';
+            svgOverlay.style.zIndex = '5';
+            gameArea.style.position = 'relative';
+            gameArea.appendChild(svgOverlay);
+        }
+        
+        // Create arrowhead marker if it doesn't exist in this SVG
+        if (!svgOverlay.querySelector('#arrowhead')) {
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+            marker.id = 'arrowhead';
+            marker.setAttribute('markerWidth', '10');
+            marker.setAttribute('markerHeight', '7');
+            marker.setAttribute('refX', '9');
+            marker.setAttribute('refY', '3.5');
+            marker.setAttribute('orient', 'auto');
+            
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+            polygon.setAttribute('fill', '#4CAF50');
+            
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+            svgOverlay.appendChild(defs);
+        }
+        
+        // Create arrow path
+        const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Calculate a slight offset for a more natural curve
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const offset = Math.min(20, distance * 0.1); // Small offset for curve
+        
+        // Create a curved path
+        const midX = (fromX + toX) / 2;
+        const midY = (fromY + toY) / 2 + offset;
+        
+        arrow.setAttribute('d', `M ${fromX} ${fromY} Q ${midX} ${midY} ${toX} ${toY}`);
+        arrow.setAttribute('stroke', '#4CAF50');
+        arrow.setAttribute('stroke-width', '3');
+        arrow.setAttribute('stroke-linecap', 'round');
+        arrow.setAttribute('fill', 'none');
+        arrow.setAttribute('marker-end', 'url(#arrowhead)');
+        arrow.setAttribute('opacity', '0.8');
+        
+        svgOverlay.appendChild(arrow);
+    }
+
+    removeArrows() {
+        const svgOverlay = document.getElementById('arrow-overlay');
+        if (svgOverlay) {
+            svgOverlay.innerHTML = '';
         }
     }
 
@@ -557,6 +736,9 @@ class GapsGame {
         
         const hoverSourceCards = document.querySelectorAll('.card.hover-source');
         hoverSourceCards.forEach(card => card.classList.remove('hover-source'));
+        
+        // Remove arrows
+        this.removeArrows();
     }
 
     handleCardHover(row, col, isHovering) {
@@ -684,12 +866,17 @@ class GapsGame {
         }
 
         const status = document.getElementById('status');
+        const redealsCount = document.getElementById('redeals-count');
+        
+        // Update redeals count
+        redealsCount.textContent = `Redeals: ${this.redealCount}`;
+        
         if (this.checkWin()) {
-            status.textContent = `🎉 Congratulations! You won! 🎉 (Redeals: ${this.redealCount})`;
+            status.textContent = `🎉 Congratulations! You won! 🎉`;
             status.className = 'status win';
             this.gameWon = true;
         } else {
-            status.textContent = `Redeals: ${this.redealCount}`;
+            status.textContent = `Click New Game to start!`;
             status.className = 'status';
         }
 
@@ -700,7 +887,7 @@ class GapsGame {
         } else if (this.shouldEnableRedeal()) {
             redealBtn.disabled = false;
             if (!this.selectedCard) {
-                status.textContent = `All gaps are blocked! Click Redeal to continue. (Redeals: ${this.redealCount})`;
+                status.textContent = `All gaps are blocked! Click Redeal to continue.`;
             }
         } else {
             redealBtn.disabled = true;
@@ -876,23 +1063,35 @@ function changeCardsPerRow() {
     updateSettingsUI();
 }
 
+function changeLookAhead() {
+    const selectedRadio = document.querySelector('input[name="look-ahead"]:checked');
+    if (selectedRadio) {
+        const lookAheadSteps = parseInt(selectedRadio.value);
+        game.settings.lookAheadSteps = lookAheadSteps;
+        
+        // Clear any existing hover highlights when changing the setting
+        game.clearHoverHighlights();
+    }
+}
+
 function updateSettingsUI() {
-    const toggle = document.getElementById('card-hover-toggle');
-    if (game.settings.cardHoverHighlighting) {
-        toggle.classList.add('active');
-    } else {
-        toggle.classList.remove('active');
-    }
-
+    // Update card hover highlighting toggle
+    const cardHoverToggle = document.getElementById('card-hover-toggle');
+    cardHoverToggle.classList.toggle('active', game.settings.cardHoverHighlighting);
+    
+    // Update redeal mode toggle
     const redealModeToggle = document.getElementById('redeal-mode-toggle');
-    if (game.settings.redealMode === 'strategic') {
-        redealModeToggle.classList.add('active');
-    } else {
-        redealModeToggle.classList.remove('active');
-    }
-
+    redealModeToggle.classList.toggle('active', game.settings.redealMode === 'strategic');
+    
+    // Update cards per row select
     const cardsPerRowSelect = document.getElementById('cards-per-row-select');
     cardsPerRowSelect.value = game.cardsPerRow;
+    
+    // Update look-ahead steps radio button
+    const lookAheadRadio = document.querySelector(`input[name="look-ahead"][value="${game.settings.lookAheadSteps}"]`);
+    if (lookAheadRadio) {
+        lookAheadRadio.checked = true;
+    }
 }
 
 window.onload = () => {

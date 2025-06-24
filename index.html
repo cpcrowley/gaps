@@ -10,6 +10,7 @@
     <div class="controls">
         <button class="btn btn-new-game" onclick="newGame()">New Game</button>
         <button class="btn btn-redeal" id="redeal-btn" onclick="redeal()" disabled>Redeal</button>
+        <span class="redeals-count" id="redeals-count">Redeals: 0</span>
         <button class="btn btn-undo" id="undo-btn" onclick="undo()" disabled>Undo</button>
         <button class="btn btn-instructions" onclick="showInstructions()">Instructions</button>
         <button class="btn btn-settings" onclick="showSettings()">Settings</button>
@@ -20,6 +21,40 @@
     </div>
 
     <div class="status" id="status">Click New Game to start!</div>
+
+    <div class="look-ahead-controls">
+        <span class="look-ahead-label">Look-ahead:</span>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="0" onchange="changeLookAhead()">
+                <span class="radio-text">0</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="1" onchange="changeLookAhead()">
+                <span class="radio-text">1</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="2" onchange="changeLookAhead()">
+                <span class="radio-text">2</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="3" onchange="changeLookAhead()">
+                <span class="radio-text">3</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="4" onchange="changeLookAhead()">
+                <span class="radio-text">4</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="5" onchange="changeLookAhead()">
+                <span class="radio-text">5</span>
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="look-ahead" value="6" onchange="changeLookAhead()">
+                <span class="radio-text">6</span>
+            </label>
+        </div>
+    </div>
 
     <div class="instructions-modal" id="instructions-modal">
         <div class="instructions-content">

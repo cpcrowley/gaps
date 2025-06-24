@@ -102,12 +102,40 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.redeals-count {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+}
+
 .game-board {
     background: rgba(0,0,0,0.3);
     border-radius: 15px;
     padding: 25px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     backdrop-filter: blur(10px);
+}
+
+#game-area {
+    position: relative;
+}
+
+#arrow-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#arrow-overlay path {
+    transition: all 0.2s ease-in-out;
 }
 
 .row {
@@ -174,15 +202,15 @@ body {
 }
 
 .gap.hover-highlight {
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
-    border-color: #ffd700;
-    color: #333;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+    color: white;
 }
 
 .card.hover-target {
     transform: translateY(-8px);
-    box-shadow: 0 8px 16px rgba(255, 215, 0, 0.8);
-    border-color: #ffd700;
+    box-shadow: 0 8px 16px rgba(76, 175, 80, 0.8);
+    border-color: #4CAF50;
     z-index: 10;
 }
 
@@ -199,8 +227,8 @@ body {
 
 .status {
     text-align: center;
-    margin-top: 20px;
     font-size: 18px;
+    margin: 20px 0;
     font-weight: bold;
 }
 
@@ -425,4 +453,60 @@ body {
 
 .instructions-body strong {
     color: #4CAF50;
+}
+
+.look-ahead-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+}
+
+.look-ahead-label {
+    font-weight: bold;
+    color: white;
+    font-size: 16px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.radio-option:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 6px;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.radio-text {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.radio-option input[type="radio"]:checked + .radio-text {
+    color: #ffd700;
+    font-size: 24px;
+    font-weight: bold;
 } 
