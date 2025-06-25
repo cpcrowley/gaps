@@ -42,7 +42,7 @@
                 <span class="radio-text">3</span>
             </label>
             <label class="radio-option">
-                <input type="radio" name="look-ahead" value="4" onchange="changeLookAhead()">
+                <input type="radio" name="look-ahead" value="4" onchange="changeLookAhead()" checked>
                 <span class="radio-text">4</span>
             </label>
             <label class="radio-option">
@@ -109,7 +109,17 @@
                     <option value="10">10 cards</option>
                     <option value="11">11 cards</option>
                     <option value="12">12 cards</option>
-                    <option value="13">13 cards</option>
+                    <option value="13" selected>13 cards</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Card display:</span>
+                <select id="card-display-select" onchange="changeCardDisplay()">
+                    <option value="text">Text</option>
+                    <option value="deck1">Deck 1</option>
+                    <option value="deck2">Deck 2</option>
+                    <option value="deck3">Deck 3</option>
+                    <option value="deck4" selected>Deck 4</option>
                 </select>
             </div>
         </div>

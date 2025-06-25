@@ -1,7 +1,7 @@
 class GapsGame {
     constructor() {
         this.suits = ['♠', '♥', '♦', '♣'];
-        this.cardsPerRow = 13; // Default to 13 cards per row
+        this.cardsPerRow = 13;
         this.ranks = this.generateRanks();
         this.board = [];
         this.selectedCard = null;
@@ -13,7 +13,112 @@ class GapsGame {
         this.settings = {
             cardHoverHighlighting: true,
             redealMode: 'strategic',
-            lookAheadSteps: 4
+            lookAheadSteps: 4,
+            cardDisplay: 'deck4'
+        };
+        
+        // Deck configurations for different naming conventions
+        this.deckConfigs = {
+            deck1: {
+                directory: 'decks/deck1',
+                naming: 'prefix', // clubs_7.png format
+                suitNames: {
+                    '♠': 'spades',
+                    '♥': 'hearts', 
+                    '♦': 'diamonds',
+                    '♣': 'clubs'
+                },
+                rankNames: {
+                    'A': '1',
+                    '2': '2',
+                    '3': '3', 
+                    '4': '4',
+                    '5': '5',
+                    '6': '6',
+                    '7': '7',
+                    '8': '8',
+                    '9': '9',
+                    '10': '10',
+                    'J': 'jack',
+                    'Q': 'queen',
+                    'K': 'king'
+                }
+            },
+            deck2: {
+                directory: 'decks/deck2',
+                naming: 'prefix', // club_7.png format
+                suitNames: {
+                    '♠': 'spade',
+                    '♥': 'heart', 
+                    '♦': 'diamond',
+                    '♣': 'club'
+                },
+                rankNames: {
+                    'A': '1',
+                    '2': '2',
+                    '3': '3', 
+                    '4': '4',
+                    '5': '5',
+                    '6': '6',
+                    '7': '7',
+                    '8': '8',
+                    '9': '9',
+                    '10': '10',
+                    'J': 'jack',
+                    'Q': 'queen',
+                    'K': 'king'
+                }
+            },
+            deck3: {
+                directory: 'decks/deck3',
+                naming: 'prefix', // club_7.png format
+                suitNames: {
+                    '♠': 'spade',
+                    '♥': 'heart', 
+                    '♦': 'diamond',
+                    '♣': 'club'
+                },
+                rankNames: {
+                    'A': '1',
+                    '2': '2',
+                    '3': '3', 
+                    '4': '4',
+                    '5': '5',
+                    '6': '6',
+                    '7': '7',
+                    '8': '8',
+                    '9': '9',
+                    '10': '10',
+                    'J': 'jack',
+                    'Q': 'queen',
+                    'K': 'king'
+                }
+            },
+            deck4: {
+                directory: 'decks/deck4',
+                naming: 'prefix', // club_7.png format
+                suitNames: {
+                    '♠': 'spade',
+                    '♥': 'heart', 
+                    '♦': 'diamond',
+                    '♣': 'club'
+                },
+                rankNames: {
+                    'A': '1',
+                    '2': '2',
+                    '3': '3', 
+                    '4': '4',
+                    '5': '5',
+                    '6': '6',
+                    '7': '7',
+                    '8': '8',
+                    '9': '9',
+                    '10': '10',
+                    'J': 'jack',
+                    'Q': 'queen',
+                    'K': 'king'
+                }
+            }
         };
     }
 
@@ -21,6 +126,30 @@ class GapsGame {
         const allRanks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         // For N cards per row, we need N-1 ranks (2 through N-1) to leave space for gaps
         return allRanks.slice(0, this.cardsPerRow - 1);
+    }
+
+    getCardImageFilename(card) {
+        const deckConfig = this.deckConfigs[this.settings.cardDisplay];
+        if (!deckConfig) {
+            return null;
+        }
+        
+        const suitName = deckConfig.suitNames[card.suit];
+        const rankName = deckConfig.rankNames[card.rank];
+        
+        if (!suitName || !rankName) {
+            return null;
+        }
+        
+        if (deckConfig.naming === 'of') {
+            // Format: 7_of_clubs.png
+            return `${rankName}_of_${suitName}.png`;
+        } else if (deckConfig.naming === 'prefix') {
+            // Format: club_7.png
+            return `${suitName}_${rankName}.png`;
+        }
+        
+        return null;
     }
 
     setCardsPerRow(count) {
@@ -627,24 +756,28 @@ class GapsGame {
     drawMoveChain(moveChain, gapElement) {
         if (moveChain.length === 0) return;
         
-        // Draw arrow from first card to gap
+        // Draw arrow from first card to gap (darkest blue) with label "1"
         const firstCardElement = document.querySelector(`[data-row="${moveChain[0].row}"][data-col="${moveChain[0].col}"]`);
         if (firstCardElement) {
-            this.drawArrow(firstCardElement, gapElement);
+            this.drawArrow(firstCardElement, gapElement, '#1e3a8a', '1', false); // Dark blue, no arrowhead
         }
         
-        // Draw arrows between subsequent cards
+        // Draw arrows between subsequent cards with progressively lighter blue and labels 2-6
+        const blueShades = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe']; // Blue gradient
+        
         for (let i = 0; i < moveChain.length - 1; i++) {
             const currentCardElement = document.querySelector(`[data-row="${moveChain[i].row}"][data-col="${moveChain[i].col}"]`);
             const nextCardElement = document.querySelector(`[data-row="${moveChain[i + 1].row}"][data-col="${moveChain[i + 1].col}"]`);
             
             if (currentCardElement && nextCardElement) {
-                this.drawArrow(nextCardElement, currentCardElement);
+                const colorIndex = Math.min(i, blueShades.length - 1);
+                const labelNumber = (i + 2).toString(); // Labels start at 2 for subsequent arrows
+                this.drawArrow(nextCardElement, currentCardElement, blueShades[colorIndex], labelNumber, false); // No arrowhead
             }
         }
     }
 
-    drawArrow(fromElement, toElement) {
+    drawArrow(fromElement, toElement, color = '#4CAF50', label = '', showArrowhead = true) {
         if (!fromElement || !toElement) return;
         
         // Get positions of both elements
@@ -670,16 +803,19 @@ class GapsGame {
             svgOverlay.style.width = '100%';
             svgOverlay.style.height = '100%';
             svgOverlay.style.pointerEvents = 'none';
-            svgOverlay.style.zIndex = '5';
+            svgOverlay.style.zIndex = '10';
             gameArea.style.position = 'relative';
             gameArea.appendChild(svgOverlay);
         }
         
-        // Create arrowhead marker if it doesn't exist in this SVG
-        if (!svgOverlay.querySelector('#arrowhead')) {
+        // Create unique marker ID for this color
+        const markerId = `arrowhead-${color.replace('#', '')}`;
+        
+        // Create arrowhead marker if it doesn't exist in this SVG and arrowhead is requested
+        if (showArrowhead && !svgOverlay.querySelector(`#${markerId}`)) {
             const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
             const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-            marker.id = 'arrowhead';
+            marker.id = markerId;
             marker.setAttribute('markerWidth', '10');
             marker.setAttribute('markerHeight', '7');
             marker.setAttribute('refX', '9');
@@ -688,7 +824,7 @@ class GapsGame {
             
             const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
             polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
-            polygon.setAttribute('fill', '#4CAF50');
+            polygon.setAttribute('fill', color);
             
             marker.appendChild(polygon);
             defs.appendChild(marker);
@@ -709,14 +845,47 @@ class GapsGame {
         const midY = (fromY + toY) / 2 + offset;
         
         arrow.setAttribute('d', `M ${fromX} ${fromY} Q ${midX} ${midY} ${toX} ${toY}`);
-        arrow.setAttribute('stroke', '#4CAF50');
+        arrow.setAttribute('stroke', color);
         arrow.setAttribute('stroke-width', '3');
         arrow.setAttribute('stroke-linecap', 'round');
         arrow.setAttribute('fill', 'none');
-        arrow.setAttribute('marker-end', 'url(#arrowhead)');
+        if (showArrowhead) {
+            arrow.setAttribute('marker-end', `url(#${markerId})`);
+        }
         arrow.setAttribute('opacity', '0.8');
         
         svgOverlay.appendChild(arrow);
+        
+        // Add number label if provided
+        if (label) {
+            // Add circle background
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', midX);
+            circle.setAttribute('cy', midY - 5);
+            circle.setAttribute('r', '13'); // 20% smaller (16 * 0.8 = 13)
+            circle.setAttribute('fill', 'white');
+            circle.setAttribute('stroke', '#333');
+            circle.setAttribute('stroke-width', '2');
+            circle.setAttribute('opacity', '0.6'); // More transparent
+            
+            svgOverlay.appendChild(circle);
+            
+            // Add number text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', midX);
+            text.setAttribute('y', midY - 5); // Slightly above the curve
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            text.setAttribute('fill', '#ff0000'); // Red color
+            text.setAttribute('font-size', '22px'); // 20% smaller (28px * 0.8 = 22px)
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('stroke', 'white');
+            text.setAttribute('stroke-width', '2px');
+            text.setAttribute('paint-order', 'stroke');
+            text.textContent = label;
+            
+            svgOverlay.appendChild(text);
+        }
     }
 
     removeArrows() {
@@ -747,76 +916,58 @@ class GapsGame {
         // Remove any existing hover highlights
         this.clearHoverHighlights();
         
-        if (isHovering && this.settings.cardHoverHighlighting) {
+        if (isHovering && this.settings.lookAheadSteps > 0) {
             const currentCard = this.board[row][col];
             if (!currentCard) return;
             
-            // Find the previous card in the same suit sequence
-            const previousCard = this.findPreviousCardInSequence(currentCard);
+            // Highlight the card we're hovering over
+            const currentElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (currentElement) {
+                currentElement.classList.add('hover-source');
+            }
             
-            if (previousCard) {
-                // Highlight the card we're hovering over
-                const currentElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                if (currentElement) {
-                    currentElement.classList.add('hover-source');
+            // Find where this card would go in its correct sequence
+            const targetPosition = this.findCorrectPositionForCard(currentCard);
+            
+            if (targetPosition) {
+                // Highlight the target position
+                const targetElement = document.querySelector(`[data-row="${targetPosition.row}"][data-col="${targetPosition.col}"]`);
+                if (targetElement) {
+                    targetElement.classList.add('hover-highlight');
                 }
                 
-                // Find the card that would move (the one after the previous card)
-                const cardToMove = this.findCardAfterPrevious(previousCard);
-                
-                if (cardToMove) {
-                    // Highlight the card that would move
-                    const cardElement = document.querySelector(`[data-row="${cardToMove.row}"][data-col="${cardToMove.col}"]`);
-                    if (cardElement) {
-                        cardElement.classList.add('hover-target');
-                    }
+                // Build and draw the move chain starting from the target position
+                const moveChain = this.buildMoveChain({ ...currentCard, row, col }, targetPosition.row, targetPosition.col);
+                if (moveChain.length > 0) {
+                    this.drawMoveChain(moveChain, targetElement);
                 }
             }
         }
     }
 
-    findPreviousCardInSequence(card) {
+    findCorrectPositionForCard(card) {
+        // Find the correct position for this card in its suit sequence
         const cardRankIndex = this.ranks.indexOf(card.rank);
-        if (cardRankIndex <= 0) return null; // No previous card for 2s
+        if (cardRankIndex === -1) return null;
         
+        // Look for the previous card in the same suit sequence
         const previousRank = this.ranks[cardRankIndex - 1];
+        if (!previousRank) return null; // This is a 2, should be in leftmost position
         
         // Find the previous card in the same suit
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < this.cardsPerRow; col++) {
                 const boardCard = this.board[row][col];
                 if (boardCard && boardCard.rank === previousRank && boardCard.suit === card.suit) {
-                    return { row, col, card: boardCard };
+                    // Found the previous card, return the position to its right
+                    const targetCol = col + 1;
+                    if (targetCol < this.cardsPerRow) {
+                        return { row, col: targetCol };
+                    }
                 }
             }
         }
-        return null;
-    }
-
-    findCardAfterPrevious(previousCard) {
-        const previousRankIndex = this.ranks.indexOf(previousCard.card.rank);
-        if (previousRankIndex >= this.ranks.length - 1) return null; // Previous card is a King
         
-        const nextRank = this.ranks[previousRankIndex + 1];
-        
-        // First, check if there's a card in the position to the right of the previous card
-        const rightPosition = { row: previousCard.row, col: previousCard.col + 1 };
-        if (rightPosition.col < this.cardsPerRow) {
-            const rightCard = this.board[rightPosition.row][rightPosition.col];
-            if (rightCard) {
-                return { row: rightPosition.row, col: rightPosition.col, card: rightCard };
-            }
-        }
-        
-        // If no card to the right, find the next card in the same suit sequence
-        for (let row = 0; row < 4; row++) {
-            for (let col = 0; col < this.cardsPerRow; col++) {
-                const boardCard = this.board[row][col];
-                if (boardCard && boardCard.rank === nextRank && boardCard.suit === previousCard.card.suit) {
-                    return { row, col, card: boardCard };
-                }
-            }
-        }
         return null;
     }
 
@@ -845,7 +996,23 @@ class GapsGame {
                     cellDiv.onmouseleave = () => this.handleGapHover(row, col, false);
                 } else {
                     cellDiv.className = `card ${cell.isRed ? 'red' : 'black'}`;
-                    cellDiv.textContent = `${cell.rank}${cell.suit}`;
+                    
+                    if (this.settings.cardDisplay !== 'text') {
+                        const imageFilename = this.getCardImageFilename(cell);
+                        if (imageFilename) {
+                            const deckConfig = this.deckConfigs[this.settings.cardDisplay];
+                            const img = document.createElement('img');
+                            img.src = `${deckConfig.directory}/${imageFilename}`;
+                            img.alt = `${cell.rank}${cell.suit}`;
+                            cellDiv.appendChild(img);
+                        } else {
+                            // Fallback to text if image not found
+                            cellDiv.textContent = `${cell.rank}${cell.suit}`;
+                        }
+                    } else {
+                        cellDiv.textContent = `${cell.rank}${cell.suit}`;
+                    }
+                    
                     cellDiv.setAttribute('data-row', row);
                     cellDiv.setAttribute('data-col', col);
                     cellDiv.onclick = () => this.handleCardClick(row, col);
@@ -1074,6 +1241,17 @@ function changeLookAhead() {
     }
 }
 
+function changeCardDisplay() {
+    const select = document.getElementById('card-display-select');
+    const newDisplay = select.value;
+    
+    // Update the game setting
+    game.settings.cardDisplay = newDisplay;
+    
+    // Re-render to show the new display mode
+    game.render();
+}
+
 function updateSettingsUI() {
     // Update card hover highlighting toggle
     const cardHoverToggle = document.getElementById('card-hover-toggle');
@@ -1092,9 +1270,18 @@ function updateSettingsUI() {
     if (lookAheadRadio) {
         lookAheadRadio.checked = true;
     }
+    
+    // Update card display select
+    const cardDisplaySelect = document.getElementById('card-display-select');
+    cardDisplaySelect.value = game.settings.cardDisplay;
 }
+
+// Initialize the UI when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateSettingsUI();
+});
 
 window.onload = () => {
     newGame();
     updateSettingsUI(); // Initialize settings UI with current game state
-}; 
+};

@@ -145,34 +145,35 @@ body {
     justify-content: center;
 }
 
-.card, .gap {
+.card {
     width: 60px;
-    height: 84px;
+    height: 80px;
+    border: 2px solid #333;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
+    font-size: 16px;
     cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
+    transition: all 0.2s ease;
+    background: white;
     position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.card {
-    background: white;
-    color: black;
-    border: 2px solid #ddd;
-    font-size: 33px;
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
 }
 
 .card.red {
-    color: #dc3545;
+    color: #d32f2f;
 }
 
 .card.black {
-    color: #212529;
+    color: #212121;
 }
 
 .card:hover {
@@ -187,11 +188,21 @@ body {
 }
 
 .gap {
-    background: linear-gradient(45deg, #555, #333);
-    border: 2px dashed #888;
-    color: #aaa;
-    font-style: italic;
-    font-size: 11px;
+    width: 60px;
+    height: 80px;
+    border: 2px dashed #999;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1976d2;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .gap.valid-drop {
@@ -275,7 +286,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.3);
     display: none;
     justify-content: center;
     align-items: center;
@@ -392,7 +403,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.3);
     display: none;
     justify-content: center;
     align-items: center;
