@@ -10,6 +10,20 @@ class GapsGame {
         this.currentHistoryIndex = -1;
         this.lastRedealIndex = -1;
         this.redealCount = 0;
+        
+        // Statistics tracking
+        this.stats = {
+            totalGames: 0,
+            completedGames: 0,
+            totalRedeals: 0,
+            totalMoves: 0,
+            averageRedealsPerGame: 0,
+            averageMovesPerGame: 0,
+            completionRate: 0,
+            currentGameMoves: 0,
+            currentRedealMoves: 0
+        };
+        
         this.settings = {
             cardHoverHighlighting: true,
             redealMode: 'strategic',
@@ -256,6 +270,9 @@ class GapsGame {
             this.board[toRow][toCol] = card;
             this.board[fromRow][fromCol] = null;
             
+            // Track the move for statistics
+            this.trackMove();
+            
             // Save game state after successful move
             this.saveGameState();
             
@@ -461,6 +478,9 @@ class GapsGame {
         
         // Increment redeal counter
         this.redealCount++;
+        
+        // Track redeal for statistics
+        this.trackRedeal();
         
         // Reset game state
         this.selectedCard = null;
@@ -1034,14 +1054,25 @@ class GapsGame {
 
         const status = document.getElementById('status');
         const redealsCount = document.getElementById('redeals-count');
+        const movesCount = document.getElementById('moves-count');
+        const redealMovesCount = document.getElementById('redeal-moves-count');
+        const correctCardsCount = document.getElementById('correct-cards-count');
         
         // Update redeals count
         redealsCount.textContent = `Redeals: ${this.redealCount}`;
         
+        // Update real-time statistics
+        movesCount.textContent = `Moves: ${this.stats.currentGameMoves}`;
+        redealMovesCount.textContent = `Since Redeal: ${this.stats.currentRedealMoves}`;
+        correctCardsCount.textContent = `Correct: ${this.countCorrectCards()}`;
+        
         if (this.checkWin()) {
             status.textContent = `🎉 Congratulations! You won! 🎉`;
             status.className = 'status win';
-            this.gameWon = true;
+            if (!this.gameWon) {
+                this.gameWon = true;
+                this.trackGameCompletion();
+            }
         } else {
             status.textContent = `Click New Game to start!`;
             status.className = 'status';
@@ -1119,20 +1150,95 @@ class GapsGame {
         const canUndo = this.currentHistoryIndex > this.lastRedealIndex;
         undoBtn.disabled = !canUndo;
     }
+
+    // Statistics tracking methods
+    trackMove() {
+        this.stats.currentGameMoves++;
+        this.stats.currentRedealMoves++;
+        this.stats.totalMoves++;
+        this.updateStats();
+    }
+
+    trackRedeal() {
+        this.stats.totalRedeals++;
+        this.stats.currentRedealMoves = 0;
+        this.updateStats();
+    }
+
+    trackGameCompletion() {
+        this.stats.completedGames++;
+        this.updateStats();
+    }
+
+    trackNewGame() {
+        this.stats.totalGames++;
+        this.stats.currentGameMoves = 0;
+        this.stats.currentRedealMoves = 0;
+        this.updateStats();
+    }
+
+    updateStats() {
+        if (this.stats.totalGames > 0) {
+            this.stats.averageRedealsPerGame = (this.stats.totalRedeals / this.stats.totalGames).toFixed(1);
+            this.stats.averageMovesPerGame = (this.stats.totalMoves / this.stats.totalGames).toFixed(1);
+            this.stats.completionRate = ((this.stats.completedGames / this.stats.totalGames) * 100).toFixed(1);
+        }
+    }
+
+    getStats() {
+        return { ...this.stats };
+    }
+
+    countCorrectCards() {
+        let correctCount = 0;
+        
+        for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < this.cardsPerRow - 1; col++) { // -1 because we need one less than cardsPerRow for the sequence
+                const card = this.board[row][col];
+                if (!card) continue; // Skip gaps
+                
+                if (col === 0) {
+                    // First position must be a 2
+                    if (card.rank === '2') {
+                        correctCount++;
+                    }
+                } else {
+                    // Must be next card in sequence and same suit as previous
+                    const expectedRank = this.ranks[col];
+                    const previousCard = this.board[row][col - 1];
+                    
+                    if (previousCard && card.rank === expectedRank && card.suit === previousCard.suit) {
+                        correctCount++;
+                    } else {
+                        break; // Sequence broken, stop counting for this row
+                    }
+                }
+            }
+        }
+        
+        return correctCount;
+    }
 }
 
 let game = new GapsGame();
 
 function newGame() {
-    // Create new game instance but preserve the current settings
+    // Create new game instance but preserve the current settings and statistics
     const currentCardsPerRow = game.cardsPerRow;
     const currentSettings = { ...game.settings };
+    const currentStats = { ...game.stats };
     
     game = new GapsGame();
     
     // Restore the settings
     game.setCardsPerRow(currentCardsPerRow);
     game.settings = currentSettings;
+    
+    // Restore the statistics
+    game.stats = currentStats;
+    
+    // Track new game for statistics
+    game.trackNewGame();
     
     // Reset redeal count for new game
     game.redealCount = 0;
@@ -1195,6 +1301,39 @@ function closeSettings() {
     settingsModal.style.display = 'none';
 }
 
+function showStats() {
+    updateStatsUI();
+    const statsModal = document.getElementById('stats-modal');
+    statsModal.style.display = 'flex';
+    
+    // Add click event listener to close when clicking outside
+    const closeStatsModal = (event) => {
+        if (event.target === statsModal) {
+            statsModal.style.display = 'none';
+            document.removeEventListener('click', closeStatsModal);
+        }
+    };
+    
+    // Use setTimeout to avoid immediate closure
+    setTimeout(() => {
+        document.addEventListener('click', closeStatsModal);
+    }, 10);
+}
+
+function closeStats() {
+    const statsModal = document.getElementById('stats-modal');
+    statsModal.style.display = 'none';
+}
+
+function updateStatsUI() {
+    const stats = game.getStats();
+    
+    document.getElementById('total-games').textContent = stats.totalGames;
+    document.getElementById('completed-games').textContent = stats.completedGames;
+    document.getElementById('avg-redeals').textContent = stats.averageRedealsPerGame;
+    document.getElementById('avg-moves').textContent = stats.averageMovesPerGame;
+}
+
 function undo() {
     if (game.currentHistoryIndex > game.lastRedealIndex) {
         game.restoreGameState(game.currentHistoryIndex - 1);
@@ -1213,7 +1352,7 @@ function toggleRedealMode() {
 }
 
 function changeCardsPerRow() {
-    const select = document.getElementById('cards-per-row-select');
+    const select = document.getElementById('cards-per-row-select-main');
     const newCount = parseInt(select.value);
     
     // Update the game size
@@ -1262,7 +1401,7 @@ function updateSettingsUI() {
     redealModeToggle.classList.toggle('active', game.settings.redealMode === 'strategic');
     
     // Update cards per row select
-    const cardsPerRowSelect = document.getElementById('cards-per-row-select');
+    const cardsPerRowSelect = document.getElementById('cards-per-row-select-main');
     cardsPerRowSelect.value = game.cardsPerRow;
     
     // Update look-ahead steps radio button

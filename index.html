@@ -10,10 +10,17 @@
     <div class="controls">
         <button class="btn btn-new-game" onclick="newGame()">New Game</button>
         <button class="btn btn-redeal" id="redeal-btn" onclick="redeal()" disabled>Redeal</button>
-        <span class="redeals-count" id="redeals-count">Redeals: 0</span>
         <button class="btn btn-undo" id="undo-btn" onclick="undo()" disabled>Undo</button>
         <button class="btn btn-instructions" onclick="showInstructions()">Instructions</button>
         <button class="btn btn-settings" onclick="showSettings()">Settings</button>
+        <button class="btn btn-stats" onclick="showStats()">Statistics</button>
+    </div>
+
+    <div class="game-stats">
+        <span class="correct-cards-count" id="correct-cards-count">Correct: 0</span>
+        <span class="redeals-count" id="redeals-count">Redeals: 0</span>
+        <span class="moves-count" id="moves-count">Moves: 0</span>
+        <span class="redeal-moves-count" id="redeal-moves-count">Since Redeal: 0</span>
     </div>
 
     <div class="game-board">
@@ -54,6 +61,22 @@
                 <span class="radio-text">6</span>
             </label>
         </div>
+    </div>
+
+    <div class="cards-per-row-controls">
+        <span class="cards-per-row-label">Cards per row:</span>
+        <select id="cards-per-row-select-main" onchange="changeCardsPerRow()">
+            <option value="4">4 cards</option>
+            <option value="5">5 cards</option>
+            <option value="6">6 cards</option>
+            <option value="7">7 cards</option>
+            <option value="8">8 cards</option>
+            <option value="9">9 cards</option>
+            <option value="10">10 cards</option>
+            <option value="11">11 cards</option>
+            <option value="12">12 cards</option>
+            <option value="13" selected>13 cards</option>
+        </select>
     </div>
 
     <div class="instructions-modal" id="instructions-modal">
@@ -98,21 +121,6 @@
                 <div class="toggle-switch" id="redeal-mode-toggle" onclick="toggleRedealMode()"></div>
             </div>
             <div class="setting-item">
-                <span class="setting-label">Cards per row:</span>
-                <select id="cards-per-row-select" onchange="changeCardsPerRow()">
-                    <option value="4">4 cards</option>
-                    <option value="5">5 cards</option>
-                    <option value="6">6 cards</option>
-                    <option value="7">7 cards</option>
-                    <option value="8">8 cards</option>
-                    <option value="9">9 cards</option>
-                    <option value="10">10 cards</option>
-                    <option value="11">11 cards</option>
-                    <option value="12">12 cards</option>
-                    <option value="13" selected>13 cards</option>
-                </select>
-            </div>
-            <div class="setting-item">
                 <span class="setting-label">Card display:</span>
                 <select id="card-display-select" onchange="changeCardDisplay()">
                     <option value="text">Text</option>
@@ -121,6 +129,33 @@
                     <option value="deck3">Deck 3</option>
                     <option value="deck4" selected>Deck 4</option>
                 </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-modal" id="stats-modal">
+        <div class="stats-content">
+            <div class="stats-header">
+                <h2>Game Statistics</h2>
+                <button class="close-stats" onclick="closeStats()">&times;</button>
+            </div>
+            <div class="stats-body">
+                <div class="stat-item">
+                    <span class="stat-label">Total Games:</span>
+                    <span class="stat-value" id="total-games">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Completed Games:</span>
+                    <span class="stat-value" id="completed-games">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Redeals per Game:</span>
+                    <span class="stat-value" id="avg-redeals">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Moves per Game:</span>
+                    <span class="stat-value" id="avg-moves">0</span>
+                </div>
             </div>
         </div>
     </div>
