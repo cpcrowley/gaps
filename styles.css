@@ -4,6 +4,24 @@
     box-sizing: border-box;
 }
 
+/* Hide external elements that hosting providers might inject */
+iframe:not([src*="your-domain"]),
+div[class*="mobile"],
+div[class*="simulator"],
+div[class*="device"],
+div[class*="responsive"],
+div[id*="mobile"],
+div[id*="simulator"],
+div[id*="device"],
+div[id*="responsive"] {
+    display: none !important;
+}
+
+/* Hide any elements outside the main body */
+body > *:not(.controls):not(.game-stats):not(.game-board):not(.status):not(.look-ahead-controls):not(.cards-per-row-controls):not(.instructions-modal):not(.settings-modal):not(.stats-modal) {
+    display: none !important;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #2c5530, #1a3d1f);

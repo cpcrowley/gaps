@@ -1417,8 +1417,51 @@ function updateSettingsUI() {
 
 // Initialize the UI when the page loads
 document.addEventListener('DOMContentLoaded', function() {
+    // Clean up any external elements injected by hosting provider
+    cleanupExternalElements();
     updateSettingsUI();
 });
+
+// Function to remove external elements
+function cleanupExternalElements() {
+    // Remove iframes that might be injected
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        if (!iframe.src.includes(window.location.hostname)) {
+            iframe.remove();
+        }
+    });
+    
+    // Remove divs with mobile/simulator related classes or IDs
+    const externalSelectors = [
+        '[class*="mobile"]',
+        '[class*="simulator"]', 
+        '[class*="device"]',
+        '[class*="responsive"]',
+        '[id*="mobile"]',
+        '[id*="simulator"]',
+        '[id*="device"]',
+        '[id*="responsive"]'
+    ];
+    
+    externalSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            // Only remove if it's not part of our game
+            if (!element.closest('.controls, .game-stats, .game-board, .status, .look-ahead-controls, .cards-per-row-controls, .instructions-modal, .settings-modal, .stats-modal')) {
+                element.remove();
+            }
+        });
+    });
+    
+    // Remove any scripts that weren't added by us
+    const scripts = document.querySelectorAll('script');
+    scripts.forEach(script => {
+        if (script.src && !script.src.includes(window.location.hostname) && !script.src.includes('script.js')) {
+            script.remove();
+        }
+    });
+}
 
 window.onload = () => {
     newGame();
