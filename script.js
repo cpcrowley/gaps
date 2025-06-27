@@ -13,13 +13,20 @@ class GapsGame {
         
         // Statistics tracking
         this.stats = {
-            totalGames: 0,
-            completedGames: 0,
-            totalRedeals: 0,
-            totalMoves: 0,
-            averageRedealsPerGame: 0,
-            averageMovesPerGame: 0,
-            completionRate: 0,
+            // Separate stats for each cards per row value
+            byCardsPerRow: {
+                4: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                5: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                6: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                7: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                8: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                9: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                10: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                11: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                12: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 },
+                13: { totalGames: 0, completedGames: 0, totalRedeals: 0, totalMoves: 0 }
+            },
+            // Current game stats
             currentGameMoves: 0,
             currentRedealMoves: 0
         };
@@ -1155,38 +1162,57 @@ class GapsGame {
     trackMove() {
         this.stats.currentGameMoves++;
         this.stats.currentRedealMoves++;
-        this.stats.totalMoves++;
-        this.updateStats();
+        this.stats.byCardsPerRow[this.cardsPerRow].totalMoves++;
     }
 
     trackRedeal() {
-        this.stats.totalRedeals++;
+        this.stats.byCardsPerRow[this.cardsPerRow].totalRedeals++;
         this.stats.currentRedealMoves = 0;
-        this.updateStats();
     }
 
     trackGameCompletion() {
-        this.stats.completedGames++;
-        this.updateStats();
+        this.stats.byCardsPerRow[this.cardsPerRow].completedGames++;
     }
 
     trackNewGame() {
-        this.stats.totalGames++;
+        this.stats.byCardsPerRow[this.cardsPerRow].totalGames++;
         this.stats.currentGameMoves = 0;
         this.stats.currentRedealMoves = 0;
-        this.updateStats();
     }
 
     updateStats() {
-        if (this.stats.totalGames > 0) {
-            this.stats.averageRedealsPerGame = (this.stats.totalRedeals / this.stats.totalGames).toFixed(1);
-            this.stats.averageMovesPerGame = (this.stats.totalMoves / this.stats.totalGames).toFixed(1);
-            this.stats.completionRate = ((this.stats.completedGames / this.stats.totalGames) * 100).toFixed(1);
-        }
+        // This method is no longer needed as we calculate stats on demand
     }
 
-    getStats() {
-        return { ...this.stats };
+    getStats(cardsPerRow = null) {
+        const targetCardsPerRow = cardsPerRow || this.cardsPerRow;
+        const stats = this.stats.byCardsPerRow[targetCardsPerRow];
+        
+        if (!stats) {
+            return {
+                totalGames: 0,
+                completedGames: 0,
+                totalRedeals: 0,
+                totalMoves: 0,
+                averageRedealsPerGame: 0,
+                averageMovesPerGame: 0,
+                completionRate: 0
+            };
+        }
+        
+        const averageRedealsPerGame = stats.totalGames > 0 ? (stats.totalRedeals / stats.totalGames).toFixed(1) : 0;
+        const averageMovesPerGame = stats.totalGames > 0 ? (stats.totalMoves / stats.totalGames).toFixed(1) : 0;
+        const completionRate = stats.totalGames > 0 ? ((stats.completedGames / stats.totalGames) * 100).toFixed(1) : 0;
+        
+        return {
+            totalGames: stats.totalGames,
+            completedGames: stats.completedGames,
+            totalRedeals: stats.totalRedeals,
+            totalMoves: stats.totalMoves,
+            averageRedealsPerGame: averageRedealsPerGame,
+            averageMovesPerGame: averageMovesPerGame,
+            completionRate: completionRate
+        };
     }
 
     countCorrectCards() {
@@ -1326,8 +1352,13 @@ function closeStats() {
 }
 
 function updateStatsUI() {
-    const stats = game.getStats();
+    const stats = game.getStats(); // This will get stats for current cards per row
+    const currentCardsPerRow = game.cardsPerRow;
     
+    // Update the header to show current cards per row
+    document.getElementById('stats-cards-per-row').textContent = currentCardsPerRow;
+    
+    // Update the statistics
     document.getElementById('total-games').textContent = stats.totalGames;
     document.getElementById('completed-games').textContent = stats.completedGames;
     document.getElementById('avg-redeals').textContent = stats.averageRedealsPerGame;
@@ -1367,6 +1398,9 @@ function changeCardsPerRow() {
     
     // Update the settings UI to reflect the change
     updateSettingsUI();
+    
+    // Update statistics UI to show stats for the new cards per row
+    updateStatsUI();
 }
 
 function changeLookAhead() {
