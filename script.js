@@ -1,7 +1,7 @@
 class GapsGame {
     constructor() {
         this.suits = ['♠', '♥', '♦', '♣'];
-        this.cardsPerRow = 13;
+        this.cardsPerRow = 5;
         this.ranks = this.generateRanks();
         this.board = [];
         this.selectedCard = null;
@@ -28,7 +28,7 @@ class GapsGame {
             cardHoverHighlighting: true,
             redealMode: 'strategic',
             lookAheadSteps: 4,
-            cardDisplay: 'deck4'
+            cardDisplay: 'text'
         };
         
         // Deck configurations for different naming conventions
