@@ -1,7 +1,7 @@
 class GapsGame {
     constructor() {
         this.suits = ['♠', '♥', '♦', '♣'];
-        this.cardsPerRow = 5;
+        this.cardsPerRow = 13;
         this.ranks = this.generateRanks();
         this.board = [];
         this.selectedCard = null;
@@ -35,7 +35,7 @@ class GapsGame {
             cardHoverHighlighting: true,
             redealMode: 'strategic',
             lookAheadSteps: 4,
-            cardDisplay: 'text'
+            cardDisplay: 'deck4'
         };
         
         // Deck configurations for different naming conventions
@@ -1024,6 +1024,10 @@ class GapsGame {
                 } else {
                     cellDiv.className = `card ${cell.isRed ? 'red' : 'black'}`;
                     
+                    // Add data attributes for card rank and suit
+                    cellDiv.setAttribute('data-rank', cell.rank);
+                    cellDiv.setAttribute('data-suit', cell.suit);
+                    
                     if (this.settings.cardDisplay !== 'text') {
                         const imageFilename = this.getCardImageFilename(cell);
                         if (imageFilename) {
@@ -1454,7 +1458,119 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clean up any external elements injected by hosting provider
     cleanupExternalElements();
     updateSettingsUI();
+    
+    // Add keyboard event listener
+    document.addEventListener('keydown', handleKeyboardInput);
 });
+
+// Keyboard input handling
+function handleKeyboardInput(event) {
+    // Don't handle keyboard input if user is typing in an input field
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT' || event.target.tagName === 'TEXTAREA') {
+        return;
+    }
+    
+    const key = event.key.toLowerCase();
+    
+    switch(key) {
+        case 'z':
+        case 'u':
+            event.preventDefault();
+            undo();
+            break;
+        case 'r':
+            event.preventDefault();
+            if (!game.gameWon && game.shouldEnableRedeal()) {
+                redeal();
+            }
+            break;
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            event.preventDefault();
+            highlightCardsByRank(key);
+            break;
+        case '0':
+            event.preventDefault();
+            highlightCardsByRank('10');
+            break;
+        case 'j':
+            event.preventDefault();
+            highlightCardsByRank('J');
+            break;
+        case 'q':
+            event.preventDefault();
+            highlightCardsByRank('Q');
+            break;
+        case 'k':
+            event.preventDefault();
+            highlightCardsByRank('K');
+            break;
+        case '+':
+        case '=':
+            event.preventDefault();
+            increaseLookAhead();
+            break;
+        case '-':
+        case '_':
+            event.preventDefault();
+            decreaseLookAhead();
+            break;
+    }
+}
+
+// Highlight cards by rank
+function highlightCardsByRank(rank) {
+    // Remove any existing highlights
+    const existingHighlights = document.querySelectorAll('.rank-highlight');
+    existingHighlights.forEach(el => el.classList.remove('rank-highlight'));
+    
+    // Find and highlight cards with the specified rank
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const cardRank = card.getAttribute('data-rank');
+        if (cardRank === rank) {
+            card.classList.add('rank-highlight');
+        }
+    });
+    
+    // Remove highlights after 3 seconds
+    setTimeout(() => {
+        const highlights = document.querySelectorAll('.rank-highlight');
+        highlights.forEach(el => el.classList.remove('rank-highlight'));
+    }, 3000);
+}
+
+// Increase look ahead
+function increaseLookAhead() {
+    const currentValue = game.settings.lookAheadSteps;
+    if (currentValue < 6) {
+        const newValue = currentValue + 1;
+        const radio = document.querySelector(`input[name="look-ahead"][value="${newValue}"]`);
+        if (radio) {
+            radio.checked = true;
+            changeLookAhead();
+        }
+    }
+}
+
+// Decrease look ahead
+function decreaseLookAhead() {
+    const currentValue = game.settings.lookAheadSteps;
+    if (currentValue > 0) {
+        const newValue = currentValue - 1;
+        const radio = document.querySelector(`input[name="look-ahead"][value="${newValue}"]`);
+        if (radio) {
+            radio.checked = true;
+            changeLookAhead();
+        }
+    }
+}
 
 // Function to remove external elements
 function cleanupExternalElements() {

@@ -274,6 +274,24 @@ body {
     border-color: #ffd700;
 }
 
+.card.rank-highlight {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 16px rgba(255, 0, 255, 0.8);
+    border-color: #ff00ff;
+    animation: rankPulse 0.5s ease-in-out;
+}
+
+@keyframes rankPulse {
+    0%, 100% { 
+        transform: translateY(-8px) scale(1);
+        box-shadow: 0 8px 16px rgba(255, 0, 255, 0.8);
+    }
+    50% { 
+        transform: translateY(-8px) scale(1.1);
+        box-shadow: 0 12px 24px rgba(255, 0, 255, 1);
+    }
+}
+
 .gap {
     width: 60px;
     height: 80px;

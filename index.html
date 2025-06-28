@@ -68,7 +68,7 @@
         <span class="cards-per-row-label">Cards per row:</span>
         <select id="cards-per-row-select-main" onchange="changeCardsPerRow()">
             <option value="4">4 cards</option>
-            <option value="5" selected>5 cards</option>
+            <option value="5">5 cards</option>
             <option value="6">6 cards</option>
             <option value="7">7 cards</option>
             <option value="8">8 cards</option>
@@ -76,7 +76,7 @@
             <option value="10">10 cards</option>
             <option value="11">11 cards</option>
             <option value="12">12 cards</option>
-            <option value="13">13 cards</option>
+            <option value="13" selected>13 cards</option>
         </select>
     </div>
 
@@ -103,6 +103,16 @@
                 <p>• Redeal keeps correct sequences (starting with 2s from the left) in place</p>
                 <p>• All other cards are reshuffled and redealt to give you more chances</p>
                 <p>• Win by completing all four rows!</p>
+                <p><strong>Keyboard Shortcuts:</strong></p>
+                <p>• <strong>Z</strong> or <strong>U</strong> - Undo last move</p>
+                <p>• <strong>R</strong> - Redeal (when available)</p>
+                <p>• <strong>2-9</strong> - Highlight all cards with that rank for 3 seconds</p>
+                <p>• <strong>0</strong> - Highlight all 10s for 3 seconds</p>
+                <p>• <strong>J</strong> - Highlight all Jacks for 3 seconds</p>
+                <p>• <strong>Q</strong> - Highlight all Queens for 3 seconds</p>
+                <p>• <strong>K</strong> - Highlight all Kings for 3 seconds</p>
+                <p>• <strong>+</strong> - Increase look-ahead by 1</p>
+                <p>• <strong>-</strong> - Decrease look-ahead by 1</p>
             </div>
         </div>
     </div>
@@ -124,11 +134,11 @@
             <div class="setting-item">
                 <span class="setting-label">Card display:</span>
                 <select id="card-display-select" onchange="changeCardDisplay()">
-                    <option value="text" selected>Text</option>
+                    <option value="text">Text</option>
                     <option value="deck1">Deck 1</option>
                     <option value="deck2">Deck 2</option>
                     <option value="deck3">Deck 3</option>
-                    <option value="deck4">Deck 4</option>
+                    <option value="deck4" selected>Deck 4</option>
                 </select>
             </div>
         </div>
