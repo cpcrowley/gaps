@@ -15,11 +15,24 @@ div[id*="simulator"],
 div[id*="device"],
 div[id*="responsive"] {
     display: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
-/* Hide any elements outside the main body */
-body > *:not(.controls):not(.game-stats):not(.game-board):not(.status):not(.look-ahead-controls):not(.cards-per-row-controls):not(.instructions-modal):not(.settings-modal):not(.stats-modal) {
-    display: none !important;
+/* More conservative approach to hiding external elements */
+body > *:not(.controls):not(.game-stats):not(.game-board):not(.status):not(.look-ahead-controls):not(.cards-per-row-controls):not(.instructions-modal):not(.settings-modal):not(.stats-modal):not(script):not(style):not(link):not(meta):not(title) {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 body {
@@ -31,6 +44,8 @@ body {
     align-items: center;
     padding: 20px;
     color: white;
+    overflow-x: hidden;
+    will-change: auto;
 }
 
 .controls {
@@ -241,11 +256,15 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    margin: 2px;
     background: white;
-    position: relative;
+    color: black;
+    transition: all 0.2s ease;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 .card img {
@@ -264,21 +283,24 @@ body {
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transform: translateY(-3px) translateZ(0);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card.selected {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(255,215,0,0.6);
-    border-color: #ffd700;
+    transform: translateY(-5px) translateZ(0);
+    box-shadow: 0 8px 16px rgba(255, 255, 0, 0.8);
+    border-color: #FFD700;
+    z-index: 5;
 }
 
 .card.rank-highlight {
-    transform: translateY(-8px);
+    transform: translateY(-8px) translateZ(0);
     box-shadow: 0 8px 16px rgba(255, 0, 255, 0.8);
     border-color: #ff00ff;
     animation: rankPulse 0.5s ease-in-out;
+    will-change: transform, box-shadow;
 }
 
 @keyframes rankPulse {
@@ -314,7 +336,8 @@ body {
     background: linear-gradient(45deg, #4CAF50, #45a049);
     border-color: #4CAF50;
     color: white;
-    animation: pulse 1s infinite;
+    animation: pulse 2s ease-in-out infinite;
+    will-change: opacity;
 }
 
 .gap.hover-highlight {
@@ -337,8 +360,14 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: scale(1.02);
+    }
 }
 
 .status {
